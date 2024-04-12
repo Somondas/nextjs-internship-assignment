@@ -6,11 +6,11 @@ export async function POST(req) {
     console.log("Name: ", name);
     console.log("Email: ", email);
     console.log("Password: ", password);
-    NextResponse.json(
+    return NextResponse.json(
       { message: "User Registered Successfully" },
       { status: 201 }
     );
   } catch (error) {
-    NextResponse.json({ message: error.message }, { status: 400 });
+    return NextResponse.json({ message: error.message }, { status: 400 });
   }
 }

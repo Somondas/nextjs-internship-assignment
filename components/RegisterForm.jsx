@@ -33,7 +33,9 @@ const RegisterForm = () => {
       } else {
         console.log("User Registration Failed");
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log("User Registration Failed", error);
+    }
   };
 
   return (
