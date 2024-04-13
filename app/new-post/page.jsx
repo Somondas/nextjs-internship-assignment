@@ -1,29 +1,26 @@
-// components/ImageUploadForm.js
 "use client";
-import { useState } from "react";
+import React, { useState } from "react";
+import { useSession } from "next-auth/react";
 
-const ImageUploadForm = () => {
-  const [selectedFile, setSelectedFile] = useState(null);
+const NewPost = () => {
+  const { data: session } = useSession();
   const [description, setDescription] = useState("");
-
-  const handleFileChange = (event) => {
+  const [selectedFile, setSelectedFile] = useState(null);
+  const handleFIleChange = (event) => {
     setSelectedFile(event.target.files[0]);
   };
-
-  const handleDescriptionChange = (event) => {
-    setDescription(event.target.value);
-  };
-
   const handleSubmit = async (event) => {
+    const user = session?.user?.name;
     event.preventDefault();
-
     const formData = new FormData();
-    formData.append("image", selectedFile);
+    formData.append("name", user);
+    formData.append("file", selectedFile);
     formData.append("description", description);
 
     try {
       const response = await fetch("/api/post", {
         method: "POST",
+
         body: formData,
       });
       if (response.ok) {
@@ -33,19 +30,33 @@ const ImageUploadForm = () => {
       console.error("Error uploading image:", error);
     }
   };
-
   return (
-    <form onSubmit={handleSubmit}>
-      <input type="file" accept="image/*" onChange={handleFileChange} />
-      <input
-        type="text"
-        placeholder="Description"
-        value={description}
-        onChange={handleDescriptionChange}
-      />
-      <button type="submit">Upload</button>
-    </form>
+    <>
+      <nav className="w-full shadow-md">
+        <div className="w-10/12 mx-auto  flex items-center justify-between">
+          <h1 className="py-3">{session?.user?.name}</h1>
+        </div>
+      </nav>
+      <div className="flex justify-center items-center w-full h-screen ">
+        <div className="w-4/12 h-[400px] bg-green-400 p-4">
+          <form onSubmit={handleSubmit}>
+            <input type="file" accept="image/*" onChange={handleFIleChange} />
+            <input
+              type="text"
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Desciption"
+            />
+            <button
+              type="submit"
+              className="bg-red-500 text-white font-bold px-6 py-2 my-2"
+            >
+              Post
+            </button>
+          </form>
+        </div>
+      </div>
+    </>
   );
 };
 
-export default ImageUploadForm;
+export default NewPost;

@@ -1,8 +1,8 @@
-// pages/api/upload-image.js
-
-import multer from "multer";
-import connectToDatabase from "@/lib/mongodb";
 import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import { connectMongoDB } from "@/lib/mongodb";
+import Post from "@/components/Post";
+import multer from "multer";
 
 const upload = multer({ dest: "uploads/" });
 
@@ -11,27 +11,25 @@ export const config = {
     bodyParser: false,
   },
 };
-
 export async function POST(req, res) {
   upload.single("image")(req, res, async function (err) {
     if (err) {
-      return res.status(500).json({ error: err.message });
+      return res.end("Something went wrong!");
     }
-
     try {
-      const { db } = await connectToDatabase();
-      const collection = db.collection("images");
-
-      const imagePath = req.file.path;
-      const description = req.body.description;
-
-      // Save imagePath and description to MongoDB
-      await collection.insertOne({ imagePath, description });
-
-      return NextResponse.json({ success: true });
+      const { name, description } = await req.json();
+      const image = req.file.path;
+      await connectMongoDB();
+      await Post.create({ name, description, image });
+      return NextResponse.json(
+        { message: "Post Created Successfully" },
+        { status: 201 }
+      );
     } catch (error) {
-      console.error("Error uploading image:", error);
-      return NextResponse.json({ error: "Internal server error" });
+      return NextResponse.json({ message: error.message }, { status: 400 });
     }
   });
+  console.log(req.body);
+  // const { name, description } = await req.body;
+  // console.log(name, description);
 }
